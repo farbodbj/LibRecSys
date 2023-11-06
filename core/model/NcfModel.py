@@ -20,4 +20,5 @@ class NcfModel():
         self.mlp_model._buildPartialGraph()
         self.gmf_model._buildParitalGraph()
         
+        self._buildNcfMerge()
         return self._buildNeuMfLayer()(self.merge_layer)

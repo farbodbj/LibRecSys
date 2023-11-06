@@ -1,3 +1,4 @@
+import abc
 import tensorflow as tf
 from keras.layers import Embedding, Input, Flatten
 from keras.constraints import NonNeg
@@ -20,6 +21,10 @@ class BaseDeepLearningModel():
     def _buildEmbedding(self, nonNeg: bool = True, **kwargs):
         raw_embedding = Embedding(self.user_count, self.latent_dim, input_dim = 1, **kwargs)
         if nonNeg: 
-            return NonNeg()(raw_embedding)
+            nonNegConst = NonNeg()(raw_embedding)
+            return Flatten()(nonNegConst)
         
         return Flatten()(raw_embedding)
+    
+    @abc.abstractmethod 
+    def _buildMergeLayer(self): raise NotImplementedError
