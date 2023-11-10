@@ -9,17 +9,15 @@ class BaseDeepLearningModel():
         self.item_count = item_count
         self.latent_dim = latent_dim
         
-        self.user_input_layer = None
-        self.item_input_layer = None
+        self.user_input = None
+        self.item_input = None
         self.user_embedding_layer = None
         self.item_embedding_layer = None
         self.merge_layer = None
         
-    def _buildInputLayer(self):
-        return Input(shape = [1], dtype = tf.int32)
     
-    def _buildEmbedding(self, nonNeg: bool = True, **kwargs):
-        raw_embedding = Embedding(self.user_count, self.latent_dim, input_dim = 1, **kwargs)
+    def _buildEmbedding(self, input, nonNeg: bool = True, **kwargs):
+        raw_embedding = Embedding(input_dim = self.user_count, output_dim = self.latent_dim, input_length = 1, **kwargs)(input)
         if nonNeg: 
             nonNegConst = NonNeg()(raw_embedding)
             return Flatten()(nonNegConst)
