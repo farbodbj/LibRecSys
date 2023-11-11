@@ -1,9 +1,8 @@
 import abc
-import tensorflow as tf
-from keras.layers import Embedding, Input, Flatten
+from keras.layers import Embedding, Flatten
 from keras.constraints import NonNeg
-
-class BaseDeepLearningModel():
+        
+class BaseRec():
     def __init__(self, user_count: int, item_count: int, latent_dim: int):
         self.user_count = user_count
         self.item_count = item_count

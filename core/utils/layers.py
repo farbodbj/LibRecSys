@@ -11,5 +11,3 @@ def denseSequenceFromList(input_layer, unit_counts: list[int], activation: list|
         tmp = layer(tmp)
         
     return tmp
-    
-        
