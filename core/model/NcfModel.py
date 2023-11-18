@@ -1,17 +1,29 @@
 import tensorflow as tf
 from core.model.BaseModels import BaseRec
 from keras.layers import Input, Multiply, concatenate, Dense, Input
-from keras.constraints import NonNeg
+from keras.optimizers import Adam
+from keras.losses import mean_squared_error
+from keras.models import Model
+from keras.utils import plot_model
 from overrides import overrides
 from core.utils import layers
 
 class NcfModel():
+    DEFAULT_LR = 3E-5
+    DEFAULT_OPTIMIZER = Adam(DEFAULT_LR)
+    DEFAULT_LOSS = mean_squared_error
+    
     def __init__(self, user_count: int, item_count: int, gmf_dim: int, mlp_dim: int):
         self.mlp_model = MlpModel(user_count, item_count, mlp_dim, [64, 32, 16], "relu")
         self.gmf_model = GmfModel(user_count, item_count, gmf_dim)
+        
         self.user_input = None 
         self.item_input = None
+        
         self.merge_layer = None
+        self.neumf = None
+        
+        self.model = None
         
         
     def _buildMergeLayer(self):
@@ -20,10 +32,11 @@ class NcfModel():
     
     
     def _buildNeuMfLayer(self):
-        return Dense(units = 1, activation = "sigmoid", kernel_initializer = "lecun_uniform")(self.merge_layer)
+        self.neumf = Dense(units = 1, activation = "sigmoid", kernel_initializer = "lecun_uniform")(self.merge_layer)
+        return self.neumf
     
     
-    def _buildModelGraph(self):
+    def buildModelGraph(self):
         self.user_input = Input(shape = [1], dtype = tf.int32)
         self.item_input = Input(shape = [1], dtype = tf.int32)        
         
@@ -39,6 +52,23 @@ class NcfModel():
         self._buildMergeLayer()
         return self._buildNeuMfLayer()
     
+    
+    def buildModel(self, optimizer = DEFAULT_OPTIMIZER, loss = DEFAULT_LOSS, **kwargs):
+        self.model = Model([self.user_input, self.item_input], self.neumf)
+        self.model.compile(
+            optimizer = optimizer,
+            loss = loss,
+            **kwargs
+        )
+        return self.model
+        
+    def getModelSummary(self, get_model_visualization: bool = True, get_model_text_summary: bool = True):
+        if get_model_text_summary: 
+            self.model.summary()
+        if get_model_visualization:
+            plot_model(self.model, f"{self.model.name}_model_vis.png")
+            print(f"model file saved to: {self.model.name}_model_vis.png")
+            
     
 class MlpModel(BaseRec):
     def __init__(self, user_count: int, item_count: int, latent_dim: int, unit_counts: list[int], activation: str):

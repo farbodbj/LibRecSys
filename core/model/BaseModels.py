@@ -16,7 +16,7 @@ class BaseRec():
         
     
     def _buildEmbedding(self, input, nonNeg: bool = True, **kwargs):
-        raw_embedding = Embedding(input_dim = self.user_count, output_dim = self.latent_dim, input_length = 1, **kwargs)(input)
+        raw_embedding = Embedding(input_dim = self.user_count, output_dim = self.latent_dim, input_length = 1, embeddings_regularizer="l2", **kwargs)(input)
         if nonNeg: 
             nonNegConst = NonNeg()(raw_embedding)
             return Flatten()(nonNegConst)
