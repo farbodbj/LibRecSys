@@ -1,14 +1,15 @@
 import tensorflow as tf
-from core.model.BaseModels import BaseRec
+from core.model.BaseClasses import BaseModel, BasePredictor
 from keras.layers import Input, Multiply, concatenate, Dense, Input
 from keras.optimizers import Adam
 from keras.losses import mean_squared_error
 from keras.models import Model
 from keras.utils import plot_model
 from overrides import overrides
+import numpy as np
 from core.utils import layers
 
-class NcfModel():
+class NcfPredictor(BasePredictor):
     DEFAULT_LR = 3E-5
     DEFAULT_OPTIMIZER = Adam(DEFAULT_LR)
     DEFAULT_LOSS = mean_squared_error
@@ -69,8 +70,16 @@ class NcfModel():
             plot_model(self.model, f"{self.model.name}_model_vis.png")
             print(f"model file saved to: {self.model.name}_model_vis.png")
             
+    @overrides
+    def predictBatch(self, user_col, item_col)->np.ndarray:
+        return self.model.predict(x = [user_col, item_col])
     
-class MlpModel(BaseRec):
+    @overrides
+    def predictSingle(self, user_id, item_id)->np.ndarray:
+        return self.model.call(inputs = [user_id, item_id])
+            
+    
+class MlpModel(BaseModel):
     def __init__(self, user_count: int, item_count: int, latent_dim: int, unit_counts: list[int], activation: str):
         super().__init__(user_count, item_count, latent_dim)
         
@@ -96,7 +105,7 @@ class MlpModel(BaseRec):
         return self.output_layer
     
     
-class GmfModel(BaseRec):
+class GmfModel(BaseModel):
     def __init__(self, user_count: int, item_count: int, latent_dim: int):
         super().__init__(user_count, item_count, latent_dim)
         

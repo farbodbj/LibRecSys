@@ -1,8 +1,9 @@
 import abc
 from keras.layers import Embedding, Flatten
 from keras.constraints import NonNeg
+import numpy as np
         
-class BaseRec():
+class BaseModel():
     def __init__(self, user_count: int, item_count: int, latent_dim: int):
         self.user_count = user_count
         self.item_count = item_count
@@ -25,3 +26,11 @@ class BaseRec():
     
     @abc.abstractmethod 
     def _buildMergeLayer(self): raise NotImplementedError
+
+class BasePredictor():
+    @abc.abstractmethod
+    def predictSingle(self, user_id, item_id)->np.ndarray: raise NotImplementedError
+    
+    @abc.abstractmethod
+    def predictBatch(self, user_col, item_col)->np.ndarray: raise NotImplementedError
+    
